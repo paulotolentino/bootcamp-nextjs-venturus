@@ -1,7 +1,39 @@
-import type { NextPage } from 'next'
+import type { NextPage } from 'next';
 
-const Home: NextPage = () => {
-  return <></>;
+import PostList from '../components/PostList';
+
+import { getPosts } from '../service/post';
+
+import { Post } from '../types';
+
+interface HomeProps {
+  posts: Post[];
 }
 
-export default Home
+const Home: NextPage<HomeProps> = ({ posts }) => {
+  return (
+    <>
+      <PostList posts={posts} />
+    </>
+  );
+};
+
+export const getStaticProps = async () => {
+  let posts: Post[] = [];
+
+  posts = await getPosts();
+
+  const updatedPosts = posts.map(post => ({
+    ...post,
+    picture: `${process.env.NEXT_PUBLIC_BACKEND_URL}/${post.picture}`,
+  }));
+
+  return {
+    props: {
+      posts: updatedPosts,
+    },
+    revalidate: 1,
+  };
+};
+
+export default Home;
